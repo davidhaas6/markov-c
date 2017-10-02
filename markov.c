@@ -2,9 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define BUFFER 25
+#define BUFFER 60 // The max length for unknown strings
 
-// A "linked dict_entryionary" that contains each of the following words and how often
+// A "linked dictionary" that contains each of the following words and how often
 // they follow after the key word
 typedef struct word_node {
   struct word_node * next;
@@ -12,7 +12,7 @@ typedef struct word_node {
   int num_occurrences;
 } word_node;
 
-// A linked dict_entryionary containing every word and a list of their following words
+// A linked dictionary containing every word and a list of their following words
 typedef struct dict_entry {
   struct dict_entry * next;
   char root_word[BUFFER];
@@ -23,6 +23,7 @@ int index_dict_entry(char * word, dict_entry * head);
 int index_word_node(char * word, word_node * head);
 void print_dict_keys(dict_entry * head);
 void print_word_node_list(word_node * head);
+void print_roots_and_nodes(dict_entry * head);
 void add_node(word_node * new_node, word_node * head);
 char * remove_last_dict_entry(dict_entry * head);
 word_node * get_following_word_nodes_list(int index, dict_entry * head);
@@ -60,12 +61,11 @@ int main() {
   words_head = current_word;
 
   while(num_words_read == 2){
-    printf("\n\n-----------\n%s %s", word, next_word);
+    //printf("\n\n-----------\n%s %s", word, next_word);
     if((dict_entry_index = index_dict_entry(word, words_head)) == -1) { // If word isn't in dict
+
       strcpy(current_word->root_word , word);
       current_word->seq_words_head = create_node(next_word);
-      printf("\n**** %s", current_word->seq_words_head->word);
-      printf("\nseq_words_head->word lives at %p.", (void*)&current_word->seq_words_head->word);
 
       // Moves onto the next pointer
       // TODO: Currently this creates an extra pointer at the end of the list. fix it.
@@ -82,7 +82,7 @@ int main() {
     } else {
       following_word->num_occurrences++;
     }
-    print_word_node_list(seq_head);
+    //print_word_node_list(seq_head);
   }
 
   // TODO: Implement a more robust system where you don't have to rewind
@@ -95,6 +95,7 @@ int main() {
 }
 remove_last_dict_entry(words_head);
 print_dict_keys(words_head);
+//print_roots_and_nodes(words_head);
 fclose(file_pointer);
 return 0;
 }
@@ -233,3 +234,25 @@ void print_word_node_list(word_node * head){
   }
   printf("(%s, %i)]", current->word, current->num_occurrences);
 }
+
+/*
+ * Prints all root_words and their respective nodes
+ */
+ void print_roots_and_nodes(dict_entry * head) {
+   dict_entry * current = head;
+   printf("\n{");
+   while (current->next != NULL){
+     printf("\n  %s:", current->root_word);
+
+     word_node * current_node = current->seq_words_head;
+     printf("\n    [");
+     while (current_node->next != NULL){
+       printf("(%s, %i), ", current_node->word, current_node->num_occurrences);
+       current_node = current_node->next;
+     }
+     printf("(%s, %i)]", current_node->word, current_node->num_occurrences);
+
+     current = current->next;
+   }
+   printf("\n}");
+ }
