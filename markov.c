@@ -26,6 +26,7 @@ void print_word_node_list(word_node * head);
 void print_roots_and_nodes(dict_entry * head);
 void add_node(word_node * new_node, word_node * head);
 char * remove_last_dict_entry(dict_entry * head);
+char * replace(char * str, char target_char, char new_char);
 word_node * get_following_word_nodes_list(int index, dict_entry * head);
 word_node * get_following_word_node(char * word, word_node * head);
 word_node * create_node(char * word);
@@ -61,7 +62,8 @@ int main() {
   words_head = current_word;
 
   while(num_words_read == 2){
-    //printf("\n\n-----------\n%s %s", word, next_word);
+    //TODO: Use replace() to remove extraneous characters
+
     if((dict_entry_index = index_dict_entry(word, words_head)) == -1) { // If word isn't in dict
 
       strcpy(current_word->root_word , word);
@@ -82,7 +84,6 @@ int main() {
     } else {
       following_word->num_occurrences++;
     }
-    //print_word_node_list(seq_head);
   }
 
   // TODO: Implement a more robust system where you don't have to rewind
@@ -99,6 +100,9 @@ print_dict_keys(words_head);
 fclose(file_pointer);
 return 0;
 }
+
+//TODO: FILL
+char * generate_sentence(){}
 
 /*
 * Returns the index of a value in the key-values of the word dictionary
@@ -137,6 +141,10 @@ int index_word_node(char * key_word, word_node * head) {
   }
   return -1;
 }
+
+/*
+ * Removes the last entry and returns its root_word
+ */
 
 char * remove_last_dict_entry(dict_entry * head) {
   char *retval;
@@ -207,6 +215,24 @@ void add_node(word_node * new_node, word_node * head) {
     current = current->next;
   }
   current->next = new_node;
+}
+
+/*
+ * Replaces a given character in a string with another character
+ */
+
+char * replace(char * str, char target_char, char new_char) {
+  // Dynamically allocates space for the new string
+  char * new_str = malloc((strlen(str)+1) * sizeof(char));
+  strcpy(new_str, str);
+  int i;
+
+  for(i = 0; i < strlen(str); i++) {
+    if(str[i] == target_char){
+      new_str[i] = new_char;
+    }
+  }
+  return new_str;
 }
 
 /*
