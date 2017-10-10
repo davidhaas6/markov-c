@@ -27,15 +27,16 @@ void print_roots_and_nodes(dict_entry * head);
 void add_node(word_node * new_node, word_node * head);
 char * remove_last_dict_entry(dict_entry * head);
 char * replace(char * str, char target_char, char new_char);
-word_node * get_following_word_nodes_list(int index, dict_entry * head);
-word_node * get_following_word_node(char * word, word_node * head);
+char * generate_sentence(dict_entry * words_head, int max_length);
+word_node * get_word_nodes_list(int index, dict_entry * head);
+word_node * find_word_node(char * word, word_node * head);
 word_node * create_node(char * word);
 
 
 int main() {
   char * file_path = "./text.txt";
   FILE * file_pointer;
-  dict_entry * words_head; // The head for the dict_entryionary of words
+  dict_entry * words_head;  // The head for the dict_entryionary of words
 
   // Opens the source file as file_pointer
   if((file_pointer = fopen(file_path, "r"))== NULL) {
@@ -43,9 +44,9 @@ int main() {
     return 1;
   }
 
-  char word[BUFFER], next_word[BUFFER]; // Two temp strings to store input words
+  char word[BUFFER], next_word[BUFFER];  // Two temp strings to store input words
   int num_words_read = fscanf(file_pointer, "%s %s", word, next_word);
-  dict_entry * current_word = malloc(sizeof(dict_entry)); // The last word in the word dict_entry
+  dict_entry * current_word = malloc(sizeof(dict_entry));  // The last word in the word dict_entry
   word_node * following_word;
   word_node * seq_head;
   int dict_entry_index;
@@ -62,7 +63,7 @@ int main() {
   words_head = current_word;
 
   while(num_words_read == 2){
-    //TODO: Use replace() to remove extraneous characters
+    //TODO: Use replace() to remove extraneous characters (clean the input)
 
     if((dict_entry_index = index_dict_entry(word, words_head)) == -1) { // If word isn't in dict
 
@@ -76,8 +77,8 @@ int main() {
       current_word->next = NULL;
   } else {
     // Gets the head pointer for the followin words linked dict
-    seq_head = get_following_word_nodes_list(dict_entry_index, words_head);
-    following_word = get_following_word_node(next_word, seq_head);
+    seq_head = get_word_nodes_list(dict_entry_index, words_head);
+    following_word = find_word_node(next_word, seq_head);
 
     if (following_word == NULL) { // If this is the first instance of next_word following word
       add_node(create_node(next_word), seq_head);
@@ -101,8 +102,16 @@ fclose(file_pointer);
 return 0;
 }
 
-//TODO: FILL
-char * generate_sentence(){}
+
+/*
+ * Utilizes Markov Chains to generate a sentance from the dict_entries given a
+ * maximum length.
+ */
+char * generate_sentence(dict_entry * words_head, int max_length){
+  //TODO: FILL
+
+}
+
 
 /*
 * Returns the index of a value in the key-values of the word dictionary
@@ -123,6 +132,7 @@ int index_dict_entry(char * key_word, dict_entry * head) {
   return -1;
 }
 
+
 /*
 * Returns the index of a value in the key-values of the word_node linked dict
 * Returns -1 if the key is not contained in the word_node linked dict
@@ -142,10 +152,10 @@ int index_word_node(char * key_word, word_node * head) {
   return -1;
 }
 
-/*
- * Removes the last entry and returns its root_word
- */
 
+/*
+ * Removes the last entry of the main dict and returns its root_word
+ */
 char * remove_last_dict_entry(dict_entry * head) {
   char *retval;
 
@@ -166,8 +176,9 @@ char * remove_last_dict_entry(dict_entry * head) {
   return retval;
 }
 
+
 /*
-* Creates a new word_node
+* Creates a new word_node for a given word
 */
 word_node * create_node(char * word){
   word_node * new_node = malloc(sizeof(word_node));
@@ -177,14 +188,17 @@ word_node * create_node(char * word){
   return new_node;
 }
 
+
 /*
 * Returns a pointer to the head node of the following words linked dict_entry
 */
-word_node * get_following_word_nodes_list(int index, dict_entry * head){
+word_node * get_word_nodes_list(int index, dict_entry * head){
   dict_entry * current = head;
+
+  // Iterates to the ith index in the dict
   int i;
   for(i=0; i<index; i++) {
-    if(current==NULL){
+    if(current==NULL) {  // Ensures the index isn't greater than the length of the dict
       printf("\nERROR: INDEX OUT OF BOUNDS\n");
       return NULL;
     }
@@ -193,7 +207,10 @@ word_node * get_following_word_nodes_list(int index, dict_entry * head){
   return current->seq_words_head;
 }
 
-word_node * get_following_word_node(char * word, word_node * head){
+/*
+ * Returns a pointer to the word_node corresponding with a certain word
+ */
+word_node * find_word_node(char * word, word_node * head){
   word_node * current = head;
 
   while(current != NULL){
@@ -206,6 +223,7 @@ word_node * get_following_word_node(char * word, word_node * head){
   return NULL;
 }
 
+
 /*
 * Adds a word_node to the end of the linked list
 */
@@ -217,10 +235,10 @@ void add_node(word_node * new_node, word_node * head) {
   current->next = new_node;
 }
 
+
 /*
  * Replaces a given character in a string with another character
  */
-
 char * replace(char * str, char target_char, char new_char) {
   // Dynamically allocates space for the new string
   char * new_str = malloc((strlen(str)+1) * sizeof(char));
@@ -235,6 +253,7 @@ char * replace(char * str, char target_char, char new_char) {
   return new_str;
 }
 
+
 /*
 * Prints the key values of the dictionary
 */
@@ -248,6 +267,7 @@ void print_dict_keys(dict_entry * head){
   printf("%s]", current->root_word);
 }
 
+
 /*
 * Prints the word_node linked list
 */
@@ -260,6 +280,7 @@ void print_word_node_list(word_node * head){
   }
   printf("(%s, %i)]", current->word, current->num_occurrences);
 }
+
 
 /*
  * Prints all root_words and their respective nodes
