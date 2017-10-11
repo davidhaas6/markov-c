@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #define BUFFER 60 // The max length for unknown strings
 
@@ -12,7 +13,7 @@ typedef struct word_node {
   int num_occurrences;
 } word_node;
 
-// A node in a cumulative denisty function array for the word_node list
+// A node in a cumulative distribution function array for the word_node list
 typedef struct cdf_node {
   struct cdf_node * next;
   char * word;
@@ -45,7 +46,8 @@ word_node * get_word_nodes_list_word(char * word, dict_entry * head);
 int main() {
   char * file_path = "./text.txt";
   FILE * file_pointer;
-  dict_entry * words_head;  // The head for the dict_entryionary of words
+  dict_entry * words_head;  // The head for the dictionary of words
+  srand(time(NULL));  // Inits the random number generator
 
   // Opens the source file as file_pointer
   if((file_pointer = fopen(file_path, "r"))== NULL) {
@@ -135,7 +137,11 @@ char * generate_sentence(char * starting_word, int max_length, dict_entry * word
   }
   cdf_head = cdf_curr;
 
-  // Creates a cumulative density function 
+  // Creates a cumulative distribution function (CDF) array so a weighted random word
+  // can be picked; ergo, each word should be picked with the same percentage that
+  // that word follows after the root word. This is done through creating an array
+  // of what is essentially intervals ([1,5,6,8,15]), and if the random number falls
+  // into a certain interval, the word corresponding with that interval is chosen.
   while (current != NULL) {
     weights_sum += current->num_occurrences;
     cdf_curr->word = current->word;
@@ -156,6 +162,19 @@ char * generate_sentence(char * starting_word, int max_length, dict_entry * word
     cdf_curr = cdf_curr->next;
   }
   printf("}\n");
+
+  int random = rand() % weights_sum;  // Random number from 0 to weights_sum
+  printf("%i", random);
+  cdf_curr = cdf_head;
+  int prev_val = -1;
+  while(cdf_curr != NULL) {
+    if(prev_val < random && random <= cdf_curr->sum_range){
+      printf("\n%s", cdf_curr->word);
+      break;
+    }
+    prev_val = cdf_curr->sum_range;
+    cdf_curr = cdf_curr->next;
+  }
 
   return "xd";
 }
